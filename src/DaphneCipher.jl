@@ -23,4 +23,9 @@ for i in 0x00:0xff
   push!(sbox,funSbox(i))
 end
 
+invSbox=copy(sbox)
+for i in 0x00:0xff
+  invSbox[funSbox(i)]=i
+end
+
 end # module DaphneCipher
