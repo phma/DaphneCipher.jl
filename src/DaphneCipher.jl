@@ -1,6 +1,7 @@
 module DaphneCipher
 using OffsetArrays
-export twist,funSbox,stepp,invStep
+export twist,funSbox,stepp,invStep,left,right
+export Daphne,setKey!
 
 # If n has at least 3 bits and k is relatively prime to the number of bits
 # in n, this permutation satisfies the strict avalanche criterion.
@@ -64,5 +65,34 @@ div257(m,n)=mul257(m,inv257[n])
 # "step" is in Base and relates to iterators.
 stepp(x,l,r)=mulOdd(sbox[mul257(x,l)],r)
 invStep(x,l,r)=div257(invSbox[divOdd(x,r)],l)
+
+mutable struct Daphne
+  key	::Vector{UInt8}
+  sreg	::Vector{UInt8}
+  acc	::UInt8
+  Daphne()=new([],[],0)
+end
+
+function setKey!(d::Daphne,k::Vector{UInt8})
+  d.key=copy(k)
+  d.sreg=zero(k)
+  d.acc=0x00
+end
+
+function left(d::Daphne)
+  a=d.acc
+  for i in reverse(eachindex(d.key))
+    a=stepp(a,d.sreg[i],d.key[i])
+  end
+  a
+end
+
+function right(d::Daphne)
+  a=d.acc
+  for i in eachindex(d.key)
+    a=stepp(a,d.key[i],d.sreg[i])
+  end
+  a
+end
 
 end # module DaphneCipher
