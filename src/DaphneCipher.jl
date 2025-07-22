@@ -9,7 +9,6 @@ recover.
 """
 module DaphneCipher
 using OffsetArrays
-export twist,funSbox,stepp,invStep,left,right
 export Daphne,setKey!,encrypt!,decrypt!
 
 # If n has at least 3 bits and k is relatively prime to the number of bits
@@ -39,12 +38,12 @@ function funSbox(n::UInt8)
   0x6e⊻shuffle(twist(n⊻0x25,-1))
 end
 
-sbox=OffsetVector(UInt8[],-1)
+const sbox=OffsetVector(UInt8[],-1)
 for i in 0x00:0xff
   push!(sbox,funSbox(i))
 end
 
-invSbox=copy(sbox)
+const invSbox=copy(sbox)
 for i in 0x00:0xff
   invSbox[funSbox(i)]=i
 end
@@ -62,7 +61,7 @@ function mul257(a::Integer,b::Integer)
   convert(typeof(a),p%256)
 end
 
-invOdd=copy(sbox)
+const invOdd=copy(sbox)
 for i in 0x00:0xff
   for j in 0x00:0xff
     if mulOdd(i,j)==0
@@ -71,7 +70,7 @@ for i in 0x00:0xff
   end
 end
 
-inv257=copy(sbox)
+const inv257=copy(sbox)
 for i in 0x00:0xff
   for j in 0x00:0xff
     if mul257(i,j)==1
