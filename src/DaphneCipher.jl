@@ -80,8 +80,8 @@ for i in 0x00:0xff
 end
 
 # "step" is in Base and relates to iterators.
-stepp(x,l,r)=mulOdd[sbox[mul257[x,l]],r]
-invStep(x,l,r)=div257[invSbox[divOdd[x,r]],l]
+stepp(x,l,r)=@inbounds mulOdd[sbox[mul257[x,l]],r]
+invStep(x,l,r)=@inbounds div257[invSbox[divOdd[x,r]],l]
 
 """
     mutable struct Daphne
