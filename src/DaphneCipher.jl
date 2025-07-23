@@ -62,42 +62,26 @@ function mul257f(a::Integer,b::Integer)
 end
 
 const mulOdd=OffsetMatrix(Matrix{UInt8}(undef,256,256),-1,-1)
+const divOdd=OffsetMatrix(Matrix{UInt8}(undef,256,256),-1,-1)
 for i in 0x00:0xff
   for j in 0x00:0xff
     mulOdd[i,j]=mulOddf(i,j)
+    divOdd[mulOddf(i,j),j]=i
   end
 end
 
 const mul257=OffsetMatrix(Matrix{UInt8}(undef,256,256),-1,-1)
+const div257=OffsetMatrix(Matrix{UInt8}(undef,256,256),-1,-1)
 for i in 0x00:0xff
   for j in 0x00:0xff
     mul257[i,j]=mul257f(i,j)
+    div257[mul257f(i,j),j]=i
   end
 end
 
-const invOdd=copy(sbox)
-for i in 0x00:0xff
-  for j in 0x00:0xff
-    if mulOdd[i,j]==0
-      invOdd[i]=j
-    end
-  end
-end
-
-const inv257=copy(sbox)
-for i in 0x00:0xff
-  for j in 0x00:0xff
-    if mul257[i,j]==1
-      inv257[i]=j
-    end
-  end
-end
-
-divOdd(m,n)=mulOdd[m,invOdd[n]]
-div257(m,n)=mul257[m,inv257[n]]
 # "step" is in Base and relates to iterators.
 stepp(x,l,r)=mulOdd[sbox[mul257[x,l]],r]
-invStep(x,l,r)=div257(invSbox[divOdd(x,r)],l)
+invStep(x,l,r)=div257[invSbox[divOdd[x,r]],l]
 
 """
     mutable struct Daphne
