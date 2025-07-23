@@ -50,21 +50,35 @@ end
 
 # Equivalent to shifting m and n left by 1 with a 1 bit (thus making them odd),
 # multiplying, and shifting right (discarding the 1 bit).
-function mulOdd(a::Integer,b::Integer)
+function mulOddf(a::Integer,b::Integer)
   a+b+0x2*a*b
 end
 
-function mul257(a::Integer,b::Integer)
+function mul257f(a::Integer,b::Integer)
   a32=convert(Int32,a)+256*(a==0) # a and b are normally UInt8,
   b32=convert(Int32,b)+256*(b==0) # which must be converted to avoid overflow.
   p=(a32*b32)%257
   convert(typeof(a),p%256)
 end
 
+const mulOdd=OffsetMatrix(Matrix{UInt8}(undef,256,256),-1,-1)
+for i in 0x00:0xff
+  for j in 0x00:0xff
+    mulOdd[i,j]=mulOddf(i,j)
+  end
+end
+
+const mul257=OffsetMatrix(Matrix{UInt8}(undef,256,256),-1,-1)
+for i in 0x00:0xff
+  for j in 0x00:0xff
+    mul257[i,j]=mul257f(i,j)
+  end
+end
+
 const invOdd=copy(sbox)
 for i in 0x00:0xff
   for j in 0x00:0xff
-    if mulOdd(i,j)==0
+    if mulOdd[i,j]==0
       invOdd[i]=j
     end
   end
@@ -73,16 +87,16 @@ end
 const inv257=copy(sbox)
 for i in 0x00:0xff
   for j in 0x00:0xff
-    if mul257(i,j)==1
+    if mul257[i,j]==1
       inv257[i]=j
     end
   end
 end
 
-divOdd(m,n)=mulOdd(m,invOdd[n])
-div257(m,n)=mul257(m,inv257[n])
+divOdd(m,n)=mulOdd[m,invOdd[n]]
+div257(m,n)=mul257[m,inv257[n]]
 # "step" is in Base and relates to iterators.
-stepp(x,l,r)=mulOdd(sbox[mul257(x,l)],r)
+stepp(x,l,r)=mulOdd[sbox[mul257[x,l]],r]
 invStep(x,l,r)=div257(invSbox[divOdd(x,r)],l)
 
 """
