@@ -106,6 +106,7 @@ function setKey!(d::Daphne,k::Vector{UInt8})
   d.key=copy(k)
   d.sreg=zero(k)
   d.acc=0x00
+  d
 end
 
 function left(d::Daphne)
